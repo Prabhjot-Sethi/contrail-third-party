@@ -1,5 +1,14 @@
 <packages>
   <package>
+    <name>Mit LibTask Library</name>
+    <url>https://libtask.googlecode.com/files/libtask-20121021.tgz</url>
+    <format>tgz</format>
+    <md5>ce73266669d1f1c40a856f63dd718afd</md5>
+    <patches>
+      <patch strip="2">libtask_patch.diff</patch>
+    </patches>
+  </package>
+  <package>
     <name>Boost C++ libraries version 1.48</name>
     <url>http://sourceforge.net/projects/boost/files/boost/1.48.0/boost_1_48_0.tar.gz</url>
     <format>tgz</format>
