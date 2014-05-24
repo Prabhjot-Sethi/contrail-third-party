@@ -1,0 +1,525 @@
+diff --git a/boost_1_54_0/boost/archive/iterators/transform_width.hpp b/boost_1_54_0/boost/archive/iterators/transform_width.hpp
+index 5a5c7b7..875fb7e 100644
+--- a/boost_1_54_0/boost/archive/iterators/transform_width.hpp
++++ b/boost_1_54_0/boost/archive/iterators/transform_width.hpp
+@@ -119,8 +119,8 @@ public:
+     transform_width(const transform_width & rhs) : 
+         super_t(rhs.base_reference()),
+         m_buffer_out_full(rhs.m_buffer_out_full),
+-        m_remaining_bits(rhs.m_remaining_bits),
+         m_buffer_in(rhs.m_buffer_in),
++        m_remaining_bits(rhs.m_remaining_bits),
+         m_end_of_sequence(false)
+     {}
+ };
+diff --git a/boost_1_54_0/boost/asio/ssl/impl/context.ipp b/boost_1_54_0/boost/asio/ssl/impl/context.ipp
+index 57a6666..9d1e7e9 100644
+--- a/boost_1_54_0/boost/asio/ssl/impl/context.ipp
++++ b/boost_1_54_0/boost/asio/ssl/impl/context.ipp
+@@ -179,7 +179,9 @@ context::context(context::method m)
+     assert(handle_);
+ #endif
+ 
+-  set_options(no_compression);
++  boost::system::error_code ec;
++  set_options(no_compression, ec);
++  assert(ec.value() == 0);
+ }
+ 
+ context::context(boost::asio::io_service&, context::method m)
+diff --git a/boost_1_54_0/boost/property_tree/.string_path.hpp.swp b/boost_1_54_0/boost/property_tree/.string_path.hpp.swp
+deleted file mode 100644
+index 09265b3..0000000
+Binary files a/boost_1_54_0/boost/property_tree/.string_path.hpp.swp and /dev/null differ
+diff --git a/boost_1_54_0/boost/property_tree/detail/ptree_implementation.hpp b/boost_1_54_0/boost/property_tree/detail/ptree_implementation.hpp
+index 31d60e3..9fc586a 100644
+--- a/boost_1_54_0/boost/property_tree/detail/ptree_implementation.hpp
++++ b/boost_1_54_0/boost/property_tree/detail/ptree_implementation.hpp
+@@ -554,7 +554,11 @@ namespace boost { namespace property_tree
+         path_type p(path);
+         self_type *n = walk_path(p);
+         if (!n) {
++#ifndef BOOST_NO_EXCEPTIONS
+             BOOST_PROPERTY_TREE_THROW(ptree_bad_path("No such node", path));
++#else
++            assert(false);
++#endif
+         }
+         return *n;
+     }
+@@ -648,9 +652,13 @@ namespace boost { namespace property_tree
+         if(boost::optional<Type> o = get_value_optional<Type>(tr)) {
+             return *o;
+         }
++#ifndef BOOST_NO_EXCEPTIONS
+         BOOST_PROPERTY_TREE_THROW(ptree_bad_data(
+             std::string("conversion of data to type \"") +
+             typeid(Type).name() + "\" failed", data()));
++#else
++        assert(false);
++#endif
+     }
+ 
+     template<class K, class D, class C>
+@@ -804,9 +812,13 @@ namespace boost { namespace property_tree
+         if(optional<data_type> o = tr.put_value(value)) {
+             data() = *o;
+         } else {
++#ifndef BOOST_NO_EXCEPTIONS
+             BOOST_PROPERTY_TREE_THROW(ptree_bad_data(
+                 std::string("conversion of type \"") + typeid(Type).name() +
+                 "\" to data failed", boost::any()));
++#else
++            assert(false);
++#endif
+         }
+     }
+ 
+diff --git a/boost_1_54_0/boost/property_tree/string_path.hpp b/boost_1_54_0/boost/property_tree/string_path.hpp
+index d4bc686..a00666d 100644
+--- a/boost_1_54_0/boost/property_tree/string_path.hpp
++++ b/boost_1_54_0/boost/property_tree/string_path.hpp
+@@ -218,7 +218,11 @@ namespace boost { namespace property_tree
+         if(optional<key_type> key = m_tr.get_value(part)) {
+             return *key;
+         }
++#ifndef BOOST_NO_EXCEPTIONS
+         BOOST_PROPERTY_TREE_THROW(ptree_bad_path("Path syntax error", *this));
++#else
++        assert(false);
++#endif
+     }
+ 
+     template <typename String, typename Translator> inline
+diff --git a/boost_1_54_0/boost/thread/lock_types.hpp b/boost_1_54_0/boost/thread/lock_types.hpp
+index 2d40d22..6b6de06 100644
+--- a/boost_1_54_0/boost/thread/lock_types.hpp
++++ b/boost_1_54_0/boost/thread/lock_types.hpp
+@@ -335,13 +335,21 @@ namespace boost
+     {
+       if (m == 0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if (owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       m->lock();
+       is_locked = true;
+@@ -350,13 +358,21 @@ namespace boost
+     {
+       if (m == 0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if (owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked = m->try_lock();
+       return is_locked;
+@@ -367,11 +383,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->timed_lock(relative_time);
+       return is_locked;
+@@ -381,11 +405,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->timed_lock(absolute_time);
+       return is_locked;
+@@ -394,11 +426,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->timed_lock(absolute_time);
+       return is_locked;
+@@ -411,11 +451,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_for(rel_time);
+       return is_locked;
+@@ -425,11 +473,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost unique_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_until(abs_time);
+       return is_locked;
+@@ -440,13 +496,21 @@ namespace boost
+     {
+       if (m == 0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if (!owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost unique_lock doesn't own the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       m->unlock();
+       is_locked = false;
+@@ -636,11 +700,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       m->lock_shared();
+       is_locked=true;
+@@ -649,11 +721,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_shared();
+       return is_locked;
+@@ -663,11 +743,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->timed_lock_shared(target_time);
+       return is_locked;
+@@ -677,11 +765,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->timed_lock_shared(target_time);
+       return is_locked;
+@@ -693,11 +789,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_shared_for(rel_time);
+       return is_locked;
+@@ -707,11 +811,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_shared_until(abs_time);
+       return is_locked;
+@@ -721,11 +833,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(!owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock doesn't own the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       m->unlock_shared();
+       is_locked=false;
+@@ -933,13 +1053,21 @@ namespace boost
+     {
+       if (m == 0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if (owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::resource_deadlock_would_occur, "boost upgrade_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       m->lock_upgrade();
+       is_locked = true;
+@@ -948,13 +1076,21 @@ namespace boost
+     {
+       if (m == 0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if (owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::resource_deadlock_would_occur, "boost upgrade_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked = m->try_lock_upgrade();
+       return is_locked;
+@@ -963,13 +1099,21 @@ namespace boost
+     {
+       if (m == 0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if (!owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(
+             boost::lock_error(system::errc::operation_not_permitted, "boost upgrade_lock doesn't own the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       m->unlock_upgrade();
+       is_locked = false;
+@@ -980,11 +1124,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_upgrade_for(rel_time);
+       return is_locked;
+@@ -994,11 +1146,19 @@ namespace boost
+     {
+       if(m==0)
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::operation_not_permitted, "boost shared_lock has no mutex"));
++#else
++        assert(false);
++#endif
+       }
+       if(owns_lock())
+       {
++#ifndef BOOST_NO_EXCEPTIONS
+         boost::throw_exception(boost::lock_error(system::errc::resource_deadlock_would_occur, "boost shared_lock owns already the mutex"));
++#else
++        assert(false);
++#endif
+       }
+       is_locked=m->try_lock_upgrade_until(abs_time);
+       return is_locked;
+diff --git a/boost_1_54_0/boost/uuid/sha1.hpp b/boost_1_54_0/boost/uuid/sha1.hpp
+index e695e13..5d6dac8 100644
+--- a/boost_1_54_0/boost/uuid/sha1.hpp
++++ b/boost_1_54_0/boost/uuid/sha1.hpp
+@@ -101,7 +101,11 @@ inline void sha1::process_byte(unsigned char byte)
+         if (bit_count_high <= 0xFFFFFFFE) {
+             ++bit_count_high;
+         } else {
++#ifndef BOOST_NO_EXCEPTIONS
+             BOOST_THROW_EXCEPTION(std::runtime_error("sha1 too many bytes"));
++#else
++            assert(false);
++#endif
+         }
+     }
+ }

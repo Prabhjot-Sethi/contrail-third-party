@@ -9,17 +9,17 @@
     </patches>
   </package>
   <package>
-    <name>Boost C++ libraries version 1.48</name>
-    <url>http://sourceforge.net/projects/boost/files/boost/1.48.0/boost_1_48_0.tar.gz</url>
+    <name>Boost C++ libraries version 1.54</name>
+    <url>http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.gz</url>
     <format>tgz</format>
-    <md5>313a11e97eb56eb7efd18325354631be</md5>
+    <md5>efbfbff5a85a9330951f243d0a46e4b9</md5>
     <patches>
-      <patch strip="2">boost_1_48_patch1.diff</patch>
-      <patch strip="2">boost_1_48_patch2.diff</patch>
-      <patch strip="2">boost_1_48_patch3.diff</patch>
-      <patch strip="0">boost_time_utc.patch</patch>
-      <patch strip="1">boost_1_48_patch4.diff</patch>
-      <patch strip="2">boost_no_exception1.diff</patch>
+      <patch strip="1">boost_jam.diff</patch>
+      <patch strip="1">boost_patch1.diff</patch>
+      <patch strip="1">boost_patch2.diff</patch>
+      <patch strip="2">boost_monotonic_timer.diff</patch>
+      <patch strip="1">boost_patch3.diff</patch>
+      <patch strip="1">boost_patch4.diff</patch>
     </patches>
   </package>
   <package>

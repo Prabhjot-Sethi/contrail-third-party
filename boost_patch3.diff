@@ -1,0 +1,214 @@
+diff --git a/boost_1_54_0/boost/thread/pthread/condition_variable.hpp b/boost_1_54_0/boost/thread/pthread/condition_variable.hpp
+index abebeb7..1993c54 100644
+--- a/boost_1_54_0/boost/thread/pthread/condition_variable.hpp
++++ b/boost_1_54_0/boost/thread/pthread/condition_variable.hpp
+@@ -60,7 +60,11 @@ namespace boost
+ #if defined BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+         if(! m.owns_lock())
+         {
++#ifndef BOOST_NO_EXCEPTIONS
+             boost::throw_exception(condition_error(-1, "boost::condition_variable::wait() failed precondition mutex not owned"));
++#else
++            assert(0);
++#endif
+         }
+ #endif
+         int res=0;
+@@ -85,7 +89,11 @@ namespace boost
+ #endif
+         if(res)
+         {
++#ifndef BOOST_NO_EXCEPTIONS
+             boost::throw_exception(condition_error(res, "boost::condition_variable::wait failed in pthread_cond_wait"));
++#else
++            assert(0);
++#endif
+         }
+     }
+ 
+@@ -96,7 +104,11 @@ namespace boost
+ #if defined BOOST_THREAD_THROW_IF_PRECONDITION_NOT_SATISFIED
+         if (!m.owns_lock())
+         {
++#ifndef BOOST_NO_EXCEPTIONS
+             boost::throw_exception(condition_error(EPERM, "boost::condition_variable::do_wait_until() failed precondition mutex not owned"));
++#else
++            assert(0);
++#endif
+         }
+ #endif
+         thread_cv_detail::lock_on_exit<unique_lock<mutex> > guard;
+@@ -121,7 +133,11 @@ namespace boost
+         }
+         if(cond_res)
+         {
++#ifndef BOOST_NO_EXCEPTIONS
+             boost::throw_exception(condition_error(cond_res, "boost::condition_variable::do_wait_until failed in pthread_cond_timedwait"));
++#else
++            assert(0);
++#endif
+         }
+         return true;
+     }
+@@ -154,13 +170,21 @@ namespace boost
+             int const res=pthread_mutex_init(&internal_mutex,NULL);
+             if(res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res, "boost::condition_variable_any::condition_variable_any() failed in pthread_mutex_init"));
++#else
++            assert(0);
++#endif
+             }
+             int const res2=pthread_cond_init(&cond,NULL);
+             if(res2)
+             {
+                 BOOST_VERIFY(!pthread_mutex_destroy(&internal_mutex));
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res, "boost::condition_variable_any::condition_variable_any() failed in pthread_cond_init"));
++#else
++            assert(0);
++#endif
+             }
+         }
+         ~condition_variable_any()
+@@ -188,7 +212,11 @@ namespace boost
+ #endif
+             if(res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(condition_error(res, "boost::condition_variable_any::wait() failed in pthread_cond_wait"));
++#else
++            assert(0);
++#endif
+             }
+         }
+ 
+@@ -368,7 +396,11 @@ namespace boost
+           }
+           if(res)
+           {
++#ifndef BOOST_NO_EXCEPTIONS
+               boost::throw_exception(condition_error(res, "boost::condition_variable_any::do_wait_until() failed in pthread_cond_timedwait"));
++#else
++            assert(0);
++#endif
+           }
+           return true;
+         }
+diff --git a/boost_1_54_0/boost/thread/pthread/condition_variable_fwd.hpp b/boost_1_54_0/boost/thread/pthread/condition_variable_fwd.hpp
+index e567fc8..c76a8af 100644
+--- a/boost_1_54_0/boost/thread/pthread/condition_variable_fwd.hpp
++++ b/boost_1_54_0/boost/thread/pthread/condition_variable_fwd.hpp
+@@ -59,7 +59,11 @@ namespace boost
+             int const res=pthread_mutex_init(&internal_mutex,NULL);
+             if(res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res, "boost::condition_variable::condition_variable() constructor failed in pthread_mutex_init"));
++#else
++                assert(0);
++#endif
+             }
+ #endif
+             int const res2=pthread_cond_init(&cond,NULL);
+@@ -68,7 +72,11 @@ namespace boost
+ #if defined BOOST_THREAD_PROVIDES_INTERRUPTIONS
+                 BOOST_VERIFY(!pthread_mutex_destroy(&internal_mutex));
+ #endif
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res2, "boost::condition_variable::condition_variable() constructor failed in pthread_cond_init"));
++#else
++                assert(0);
++#endif
+             }
+         }
+         ~condition_variable()
+diff --git a/boost_1_54_0/boost/thread/pthread/mutex.hpp b/boost_1_54_0/boost/thread/pthread/mutex.hpp
+index c151079..5d3c998 100644
+--- a/boost_1_54_0/boost/thread/pthread/mutex.hpp
++++ b/boost_1_54_0/boost/thread/pthread/mutex.hpp
+@@ -100,7 +100,11 @@ namespace boost
+             int const res=pthread_mutex_init(&m,NULL);
+             if(res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res, "boost:: mutex constructor failed in pthread_mutex_init"));
++#else
++            assert(0);
++#endif
+             }
+         }
+         ~mutex()
+@@ -113,7 +117,11 @@ namespace boost
+             int res = posix::pthread_mutex_lock(&m);
+             if (res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(lock_error(res,"boost: mutex lock failed in pthread_mutex_lock"));
++#else
++            assert(0);
++#endif
+             }
+         }
+ 
+@@ -122,7 +130,11 @@ namespace boost
+             int res = posix::pthread_mutex_unlock(&m);
+             if (res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(lock_error(res,"boost: mutex unlock failed in pthread_mutex_unlock"));
++#else
++            assert(0);
++#endif
+             }
+         }
+ 
+@@ -171,7 +183,11 @@ namespace boost
+             int const res=pthread_mutex_init(&m,NULL);
+             if(res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res, "boost:: timed_mutex constructor failed in pthread_mutex_init"));
++#else
++            assert(0);
++#endif
+             }
+ #ifndef BOOST_PTHREAD_HAS_TIMEDLOCK
+             int const res2=pthread_cond_init(&cond,NULL);
+@@ -179,7 +195,11 @@ namespace boost
+             {
+                 BOOST_VERIFY(!posix::pthread_mutex_destroy(&m));
+                 //BOOST_VERIFY(!pthread_mutex_destroy(&m));
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(thread_resource_error(res2, "boost:: timed_mutex constructor failed in pthread_cond_init"));
++#else
++            assert(0);
++#endif
+             }
+             is_locked=false;
+ #endif
+@@ -209,7 +229,11 @@ namespace boost
+             int res = posix::pthread_mutex_lock(&m);
+             if (res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(lock_error(res,"boost: mutex lock failed in pthread_mutex_lock"));
++#else
++            assert(0);
++#endif
+             }
+         }
+ 
+@@ -218,7 +242,11 @@ namespace boost
+             int res = posix::pthread_mutex_unlock(&m);
+             if (res)
+             {
++#ifndef BOOST_NO_EXCEPTIONS
+                 boost::throw_exception(lock_error(res,"boost: mutex unlock failed in pthread_mutex_unlock"));
++#else
++            assert(0);
++#endif
+             }
+         }
+ 
