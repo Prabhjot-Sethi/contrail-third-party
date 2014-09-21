@@ -1,0 +1,129 @@
+diff --git a/third_party/libtask/task.c b/libtask/task.c
+--- a/third_party/libtask/task.c
++++ b/third_party/libtask/task.c
+@@ -3,6 +3,7 @@
+ #include "taskimpl.h"
+ #include <fcntl.h>
+ #include <stdio.h>
++#include <pthread.h>
+ 
+ int	taskdebuglevel;
+ int	taskcount;
+@@ -16,6 +17,8 @@
+ Task	**alltask;
+ int		nalltask;
+ 
++pthread_mutex_t lock_all_task;
++
+ static char *argv0;
+ static	void		contextswitch(Context *from, Context *to);
+ 
+@@ -143,14 +146,18 @@
+ 	taskcount++;
+ 	id = t->id;
+ 	if(nalltask%64 == 0){
++        pthread_mutex_lock(&lock_all_task);
+ 		alltask = realloc(alltask, (nalltask+64)*sizeof(alltask[0]));
+ 		if(alltask == nil){
+ 			fprint(2, "out of memory\n");
+ 			abort();
+ 		}
++        pthread_mutex_unlock(&lock_all_task);
+ 	}
+ 	t->alltaskslot = nalltask;
++    pthread_mutex_lock(&lock_all_task);
+ 	alltask[nalltask++] = t;
++    pthread_mutex_unlock(&lock_all_task);
+ 	taskready(t);
+ 	return id;
+ }
+@@ -175,7 +182,9 @@
+ taskready(Task *t)
+ {
+ 	t->ready = 1;
++    pthread_mutex_lock(&lock_all_task);
+ 	addtask(&taskrunqueue, t);
++    pthread_mutex_unlock(&lock_all_task);
+ }
+ 
+ int
+@@ -219,7 +228,7 @@
+ 	}
+ }
+ 
+-static void
++void
+ taskscheduler(void)
+ {
+ 	int i;
+@@ -229,12 +238,16 @@
+ 	for(;;){
+ 		if(taskcount == 0)
+ 			exit(taskexitval);
++        pthread_mutex_lock(&lock_all_task);
+ 		t = taskrunqueue.head;
++        pthread_mutex_unlock(&lock_all_task);
+ 		if(t == nil){
+ 			fprint(2, "no runnable tasks! %d tasks stalled\n", taskcount);
+ 			exit(1);
+ 		}
++        pthread_mutex_lock(&lock_all_task);
+ 		deltask(&taskrunqueue, t);
++        pthread_mutex_unlock(&lock_all_task);
+ 		t->ready = 0;
+ 		taskrunning = t;
+ 		tasknswitch++;
+@@ -246,8 +259,10 @@
+ 			if(!t->system)
+ 				taskcount--;
+ 			i = t->alltaskslot;
++            pthread_mutex_lock(&lock_all_task);
+ 			alltask[i] = alltask[--nalltask];
+ 			alltask[i]->alltaskslot = i;
++            pthread_mutex_unlock(&lock_all_task);
+ 			free(t);
+ 		}
+ 	}
+@@ -321,7 +336,9 @@
+ 
+ 	fprint(2, "task list:\n");
+ 	for(i=0; i<nalltask; i++){
++        pthread_mutex_lock(&lock_all_task);
+ 		t = alltask[i];
++        pthread_mutex_unlock(&lock_all_task);
+ 		if(t == taskrunning)
+ 			extra = " (running)";
+ 		else if(t->ready)
+@@ -350,7 +367,7 @@
+ }
+ 
+ int
+-main(int argc, char **argv)
++Run(int argc, char **argv)
+ {
+ 	struct sigaction sa, osa;
+ 
+diff --git a/third_party/libtask/task.h b/libtask/task.h
+--- a/third_party/libtask/task.h
++++ b/third_party/libtask/task.h
+@@ -33,6 +33,8 @@
+ unsigned int	taskdelay(unsigned int);
+ unsigned int	taskid(void);
+ 
++void taskscheduler(void);
++
+ struct Tasklist	/* used internally */
+ {
+ 	Task	*head;
+diff --git a/third_party/libtask/testdelay.c b/libtask/testdelay.c
+--- a/third_party/libtask/testdelay.c
++++ b/third_party/libtask/testdelay.c
+@@ -3,7 +3,7 @@
+ #include <errno.h>
+ #include <unistd.h>
+ #include <stdlib.h>
+-#include <task.h>
++#include "task.h"
+ 
+ enum { STACK = 32768 };
+ 
