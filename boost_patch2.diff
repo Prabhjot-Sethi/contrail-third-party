@@ -1,0 +1,120 @@
+diff --git a/boost_1_54_0/boost/date_time/format_date_parser.hpp b/boost_1_54_0/boost/date_time/format_date_parser.hpp
+index 3f64767..e4cc72e 100644
+--- a/boost_1_54_0/boost/date_time/format_date_parser.hpp
++++ b/boost_1_54_0/boost/date_time/format_date_parser.hpp
+@@ -68,11 +68,17 @@ fixed_string_to_int(std::istreambuf_iterator<charT>& itr,
+   if(mr.cache.size() < length) {
+     return i;
+   }
+-  try {
++#ifndef BOOST_NO_EXCEPTIONS
++  try
++#endif
++  {
+     i = boost::lexical_cast<int_type>(mr.cache);
+-  }catch(bad_lexical_cast&){
++  }
++#ifndef BOOST_NO_EXCEPTIONS
++  catch(bad_lexical_cast&){
+     // we want to return -1 if the cast fails so nothing to do here
+   }
++#endif
+   return i;
+ }
+ 
+diff --git a/boost_1_54_0/boost/date_time/time_facet.hpp b/boost_1_54_0/boost/date_time/time_facet.hpp
+index 63de525..ac4520a 100644
+--- a/boost_1_54_0/boost/date_time/time_facet.hpp
++++ b/boost_1_54_0/boost/date_time/time_facet.hpp
+@@ -1005,9 +1005,13 @@ namespace date_time {
+                     char_type cs[3] = { '%', *itr };
+                     string_type s(cs);
+                     match_results mr;
+-                    try {
++#ifndef BOOST_NO_EXCEPTIONS
++                    try
++#endif
++                    {
+                       t_year = this->m_parser.parse_year(sitr, stream_end, s, mr);
+                     }
++#ifndef BOOST_NO_EXCEPTIONS
+                     catch(std::out_of_range&) { // base class for bad_year exception
+                       if(this->m_sv_parser.match(sitr, stream_end, mr)) {
+                         t = time_type(static_cast<special_values>(mr.current_match));
+@@ -1019,6 +1023,7 @@ namespace date_time {
+                       }
+ #endif
+                     }
++#endif
+                     break;
+                   }
+                 case 'B':
+@@ -1028,9 +1033,13 @@ namespace date_time {
+                     char_type cs[3] = { '%', *itr };
+                     string_type s(cs);
+                     match_results mr;
+-                    try {
++#ifndef BOOST_NO_EXCEPTIONS
++                    try
++#endif
++                    {
+                       t_month = this->m_parser.parse_month(sitr, stream_end, s, mr);
+                     }
++#ifndef BOOST_NO_EXCEPTIONS
+                     catch(std::out_of_range&) { // base class for bad_month exception
+                       if(this->m_sv_parser.match(sitr, stream_end, mr)) {
+                         t = time_type(static_cast<special_values>(mr.current_match));
+@@ -1042,6 +1051,7 @@ namespace date_time {
+                       }
+ #endif
+                     }
++#endif
+                     // did m_parser already advance sitr to next char?
+                     if(mr.has_remaining()) {
+                       use_current_char = true;
+@@ -1057,9 +1067,13 @@ namespace date_time {
+                     string_type s(cs);
+                     match_results mr;
+                     typename date_type::day_of_week_type wd(0);
+-                    try {
++#ifndef BOOST_NO_EXCEPTIONS
++                    try
++#endif
++                    {
+                       wd = this->m_parser.parse_weekday(sitr, stream_end, s, mr);
+                     }
++#ifndef BOOST_NO_EXCEPTIONS
+                     catch(std::out_of_range&) { // base class for bad_weekday exception
+                       if(this->m_sv_parser.match(sitr, stream_end, mr)) {
+                         t = time_type(static_cast<special_values>(mr.current_match));
+@@ -1071,6 +1085,7 @@ namespace date_time {
+                       }
+ #endif
+                     }
++#endif
+                     // did m_parser already advance sitr to next char?
+                     if(mr.has_remaining()) {
+                       use_current_char = true;
+@@ -1095,9 +1110,13 @@ namespace date_time {
+                   }
+                 case 'd':
+                   {
+-                    try {
++#ifndef BOOST_NO_EXCEPTIONS
++                    try
++#endif
++                    {
+                       t_day = this->m_parser.parse_day_of_month(sitr, stream_end);
+                     }
++#ifndef BOOST_NO_EXCEPTIONS
+                     catch(std::out_of_range&) { // base class for exception bad_day_of_month
+                       match_results mr;
+                       if(this->m_sv_parser.match(sitr, stream_end, mr)) {
+@@ -1110,6 +1129,7 @@ namespace date_time {
+                       }
+ #endif
+                     }
++#endif
+                     break;
+                   }
+                 // time flags

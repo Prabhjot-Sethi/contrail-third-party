@@ -1,0 +1,21 @@
+diff --git a/boost_1_54_0/tools/build/v2/engine/build.jam b/boost_1_54_0/tools/build/v2/engine/build.jam
+index b508785..e4c0d5f 100644
+--- a/boost_1_54_0/tools/build/v2/engine/build.jam
++++ b/boost_1_54_0/tools/build/v2/engine/build.jam
+@@ -204,6 +204,7 @@ toolset darwin cc :  "-o " : -D
+     [ opt --release : -Wl,-x -O3 -finline-functions ]
+     [ opt --debug : -g -O0 -fno-inline -pg ]
+     [ opt --profile : -Wl,-x -O3 -finline-functions -g -pg ]
++    -I$(SDKROOT)/usr/include -L$(SDKROOT)/usr/lib
+     -I$(--python-include) -I$(--extra-include)
+     : -L$(--python-lib[1]) -l$(--python-lib[2]) ;
+ ## GCC 2.x, 3.x, 4.x
+@@ -571,7 +572,7 @@ if $(UNIX) = true {
+ rule .mkdir
+ {
+     NOUPDATE $(<) ;
+-    if $(<:P) { DEPENDS $(<) : $(<:P) ; .mkdir $(<:P) ; }
++    if $(<) != "/" && $(<:P) { DEPENDS $(<) : $(<:P) ; .mkdir $(<:P) ; }
+     if ! $(md<$(<)>) { [MKDIR] $(<) ; md<$(<)> = - ; }
+ }
+ if $(OS) = NT { actions [MKDIR] {
