@@ -35,6 +35,7 @@
       <patch strip="2">boost_monotonic_timer.diff</patch>
       <patch strip="1">boost_patch3.diff</patch>
       <patch strip="1">boost_patch4.diff</patch>
+      <patch strip="1">boost_patch5.diff</patch>
     </patches>
     <platform>
       <exclude>

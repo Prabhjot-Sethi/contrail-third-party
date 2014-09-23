@@ -1,0 +1,74 @@
+diff --git a/boost_1_54_0/boost/interprocess/sync/spin/mutex.hpp b/boost_1_54_0/boost/interprocess/sync/spin/mutex.hpp
+index 5a5c7b7..875fb7e 100644
+--- a/boost_1_54_0/boost/interprocess/sync/spin/mutex.hpp
++++ b/boost_1_54_0/boost/interprocess/sync/spin/mutex.hpp
+@@ -19,7 +19,7 @@
+ #include <boost/interprocess/detail/workaround.hpp>
+ #include <boost/interprocess/detail/posix_time_types_wrk.hpp>
+ #include <boost/assert.hpp>
+-#include <boost/interprocess/detail/atomic.hpp>
++#include <boost/atomic.hpp>
+ #include <boost/cstdint.hpp>
+ #include <boost/interprocess/detail/os_thread_functions.hpp>
+ 
+@@ -33,6 +33,14 @@
+    spin_mutex &operator=(const spin_mutex &);
+    public:
+ 
++   class scoped_lock {
++   public:
++     scoped_lock(spin_mutex &mutex) : m(&mutex) {m->lock();}
++     ~scoped_lock() {m->unlock();}
++   private:
++     spin_mutex *m;
++   };
++   
+    spin_mutex();
+    ~spin_mutex();
+ 
+@@ -42,11 +50,11 @@
+    void unlock();
+    void take_ownership(){};
+    private:
+-   volatile boost::uint32_t m_s;
++   boost::atomic<bool> m_s;
+ };
+ 
+ inline spin_mutex::spin_mutex()
+-   : m_s(0)
++   : m_s(false)
+ {
+    //Note that this class is initialized to zero.
+    //So zeroed memory can be interpreted as an
+@@ -61,9 +69,9 @@
+ inline void spin_mutex::lock(void)
+ {
+    do{
+-      boost::uint32_t prev_s = ipcdetail::atomic_cas32(const_cast<boost::uint32_t*>(&m_s), 1, 0);
++      bool prev_s = m_s.exchange(true);
+ 
+-      if (m_s == 1 && prev_s == 0){
++      if (m_s == true && prev_s == false){
+             break;
+       }
+       // relinquish current timeslice
+@@ -73,8 +81,8 @@
+ 
+ inline bool spin_mutex::try_lock(void)
+ {
+-   boost::uint32_t prev_s = ipcdetail::atomic_cas32(const_cast<boost::uint32_t*>(&m_s), 1, 0);
+-   return m_s == 1 && prev_s == 0;
++   bool prev_s = m_s.exchange(true);
++   return m_s == true && prev_s == false;
+ }
+ 
+ inline bool spin_mutex::timed_lock(const boost::posix_time::ptime &abs_time)
+@@ -103,7 +111,7 @@
+ }
+ 
+ inline void spin_mutex::unlock(void)
+-{  ipcdetail::atomic_cas32(const_cast<boost::uint32_t*>(&m_s), 0, 1);   }
++{  m_s = false;/*ipcdetail::atomic_cas32(const_cast<boost::uint32_t*>(&m_s), 0, 1);*/   }
+ 
+ }  //namespace ipcdetail {
+ }  //namespace interprocess {
